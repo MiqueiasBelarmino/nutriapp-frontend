@@ -3,10 +3,10 @@ import { useState, useEffect, useCallback } from 'react'
 import toast from 'react-hot-toast'
 import api from '@/lib/api';
 
-interface Patient {
+export interface Patient {
   id: string
   name: string
-  gender: 'male' | 'female'
+  gender: string
   birthDate: string
   weight?: number
   height?: number
@@ -14,6 +14,7 @@ interface Patient {
   userId: string
   createdAt: string
   updatedAt: string
+  phone?: string
 }
 
 export const usePatients = () => {
@@ -75,8 +76,8 @@ export const usePatients = () => {
       await fetchPatients()
       toast.success('Paciente removido com sucesso!')
     } catch (error) {
-      console.error('Failed to delete patient:', error)
-      toast.error('Erro ao remover paciente')
+      console.error('Failed to delete patient:', error.response.data.message)
+      toast.error(error?.response?.data?.message ?? 'Erro ao remover paciente')
       throw error
     }
   }

@@ -100,3 +100,16 @@ export function calculateBodyComposition(weight: number, fatPercent: number) {
   
   return { fatMass, leanMass }
 }
+
+export function parseGender(gender: string): string {
+  switch (gender) {
+    case 'male':
+      return 'Masculino'
+    case 'female':
+      return 'Feminino'
+    case 'other':
+      return 'Outro'
+    default:
+      return 'Desconhecido'
+  }
+} 

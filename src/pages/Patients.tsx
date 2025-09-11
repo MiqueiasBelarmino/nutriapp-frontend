@@ -5,11 +5,13 @@ import { Plus, Search, Filter, MoreVertical, User, Phone, Mail, Calendar, Trash,
 import { usePatients, Patient } from '../hooks/usePatients'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
+import { parseGender } from '@/lib/utils'
 
 const Patients: React.FC = () => {
-  const { patients, loading, fetchPatients, createPatient, updatePatient } = usePatients()
+  const { patients, loading, fetchPatients, createPatient, updatePatient, deletePatient } = usePatients()
   const [searchTerm, setSearchTerm] = useState('')
   const [showCreateForm, setShowCreateForm] = useState(false)
+  const [deletingPatient, setDeletingPatient] = useState<Patient | null>(null)
   const [editingPatient, setEditingPatient] = useState<Patient | null>(null)
   const [sortBy, setSortBy] = useState<'name' | 'createdAt'>('name')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
@@ -22,7 +24,7 @@ const Patients: React.FC = () => {
     .filter(patient =>
       patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       patient.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      patient.phone.includes(searchTerm)
+      patient?.phone?.includes(searchTerm)
     )
     .sort((a, b) => {
       let comparison = 0
@@ -45,8 +47,8 @@ const Patients: React.FC = () => {
         birthDate: formData.get('birthDate') as string,
         phone: formData.get('phone') as string,
         email: formData.get('email') as string,
-        address: formData.get('address') as string,
-        medicalHistory: formData.get('medicalHistory') as string
+        weight: Number(formData.get('weight')),
+        height: Number(formData.get('height')),
       })
       setShowCreateForm(false)
     } catch (error) {
@@ -67,12 +69,22 @@ const Patients: React.FC = () => {
         birthDate: formData.get('birthDate') as string,
         phone: formData.get('phone') as string,
         email: formData.get('email') as string,
-        address: formData.get('address') as string,
-        medicalHistory: formData.get('medicalHistory') as string
       })
       setEditingPatient(null)
     } catch (error) {
       console.error('Erro ao atualizar paciente:', error)
+    }
+  }
+
+  const handleDeletePatient = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    try {
+      if (!deletingPatient) return
+      await deletePatient(deletingPatient.id)
+      setDeletingPatient(null)
+    } catch (error) {
+      console.error('Erro ao deletar paciente:', error)
     }
   }
 
@@ -214,7 +226,7 @@ const Patients: React.FC = () => {
                   <div>
                     <h3 className="font-semibold text-gray-900">{patient.name}</h3>
                     <p className="text-sm text-gray-500">
-                      {calculateAge(patient.birthDate)} anos • {patient.gender}
+                      {calculateAge(patient.birthDate)} anos • {parseGender(patient.gender)}
                     </p>
                   </div>
                 </div>
@@ -228,11 +240,11 @@ const Patients: React.FC = () => {
                       <DropdownMenuContent>
                         <DropdownMenuLabel>Ações</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setEditingPatient(patient)}>
                           <Edit className="w-4 h-4 mr-1" />
                           Editar
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setDeletingPatient(patient)}>
                           <Trash className="w-4 h-4 mr-1" />
                           Deletar
                         </DropdownMenuItem>
@@ -336,9 +348,9 @@ const Patients: React.FC = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   >
                     <option value="">Selecione</option>
-                    <option value="masculino">Masculino</option>
-                    <option value="feminino">Feminino</option>
-                    <option value="outro">Outro</option>
+                    <option value="male">Masculino</option>
+                    <option value="female">Feminino</option>
+                    <option value="other">Outro</option>
                   </select>
                 </div>
 
@@ -378,17 +390,31 @@ const Patients: React.FC = () => {
                   />
                 </div>
 
-                <div className="md:col-span-2">
+                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Endereço
+                    Peso (Kg) *
                   </label>
                   <input
-                    name="address"
-                    type="text"
+                    name="weight"
+                    type="number"
+                    step={0.1}
+                    required
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   />
                 </div>
 
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Altura (cm) *
+                  </label>
+                  <input
+                    name="height"
+                    type="number"
+                    step={0.1}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  />
+                </div>
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Histórico Médico
@@ -456,9 +482,9 @@ const Patients: React.FC = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   >
                     <option value="">Selecione</option>
-                    <option value="masculino">Masculino</option>
-                    <option value="feminino">Feminino</option>
-                    <option value="outro">Outro</option>
+                    <option value="male">Masculino</option>
+                    <option value="female">Feminino</option>
+                    <option value="other">Outro</option>
                   </select>
                 </div>
 
@@ -470,7 +496,7 @@ const Patients: React.FC = () => {
                     name="birthDate"
                     type="date"
                     required
-                    defaultValue={editingPatient.birthDate}
+                    defaultValue={editingPatient.birthDate.split('T')[0]}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   />
                 </div>
@@ -501,19 +527,7 @@ const Patients: React.FC = () => {
                   />
                 </div>
 
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Endereço
-                  </label>
-                  <input
-                    name="address"
-                    type="text"
-                    defaultValue={editingPatient.address}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  />
-                </div>
-
-                <div className="md:col-span-2">
+                {/* <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Histórico Médico
                   </label>
@@ -524,7 +538,7 @@ const Patients: React.FC = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     placeholder="Alergias, condições médicas, medicamentos em uso..."
                   />
-                </div>
+                </div> */}
               </div>
 
               <div className="flex justify-end space-x-3 mt-6">
@@ -540,6 +554,47 @@ const Patients: React.FC = () => {
                   className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                 >
                   Salvar Alterações
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {deletingPatient && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200">
+              <h2 className="text-2xl font-bold text-gray-900">Deseja remover o paciente?</h2>
+            </div>
+
+            <form onSubmit={handleDeletePatient} className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <input
+                    name="id"
+                    type="hidden"
+                    value={deletingPatient.id}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  />
+                </div>
+
+              </div>
+
+              <div className="flex justify-end space-x-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setDeletingPatient(null)}
+                  className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                >
+                  Confirmar
                 </button>
               </div>
             </form>

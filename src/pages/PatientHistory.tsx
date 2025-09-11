@@ -8,7 +8,7 @@ import { useMealPlans } from '../hooks/useMealPlans'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { calculateBMI } from '@/lib/utils'
+import { calculateBMI, parseGender } from '@/lib/utils'
 
 const PatientHistory: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -147,7 +147,7 @@ const PatientHistory: React.FC = () => {
           <CardContent>
             <div className="flex items-start space-x-6">
               <Avatar className="h-20 w-20">
-                <AvatarFallback className="bg-primary text-primary-foreground text-lg">
+                <AvatarFallback className="bg-green-600 text-primary-foreground text-lg">
                   {getInitials(patient.name)}
                 </AvatarFallback>
               </Avatar>
@@ -166,7 +166,7 @@ const PatientHistory: React.FC = () => {
                   <div className="flex items-center space-x-2">
                     <User className="h-4 w-4 text-gray-500" />
                     <span className="text-sm text-gray-600">
-                      {patient.gender === 'male' ? 'Masculino' : 'Feminino'}
+                      {parseGender(patient.gender)}
                     </span>
                   </div>
 
