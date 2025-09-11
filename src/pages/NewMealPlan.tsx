@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -13,13 +13,13 @@ import { ArrowLeft, Utensils } from 'lucide-react'
 
 const NewMealPlan: React.FC = () => {
   const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
+  const { patientId } = useParams<{ patientId: string }>()
   const { patients, fetchPatients } = usePatients()
   const { createMealPlan } = useMealPlans()
   const [loading, setLoading] = useState(false)
   
   const [formData, setFormData] = useState({
-    patientId: searchParams.get('patientId') || '',
+    patientId: patientId || '',
     date: new Date().toISOString().split('T')[0],
     content: '',
     calories: '',
@@ -28,7 +28,7 @@ const NewMealPlan: React.FC = () => {
 
   useEffect(() => {
     fetchPatients()
-  }, [fetchPatients])
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -76,7 +76,7 @@ const NewMealPlan: React.FC = () => {
           Voltar
         </Button>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Novo Plano Alimentar</h1>
+          <h1 className="text-3xl font-bold text-gray-900">(EM CONSTRUÇÃO) Novo Plano Alimentar</h1>
           <p className="text-gray-600 mt-2">
             Crie um plano alimentar personalizado para o paciente
           </p>
@@ -124,7 +124,7 @@ const NewMealPlan: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="calories">Calorias Totais *</Label>
+              <Label htmlFor="calories">Calorias Totais</Label>
               <Input
                 id="calories"
                 type="number"
@@ -132,17 +132,16 @@ const NewMealPlan: React.FC = () => {
                 value={formData.calories}
                 onChange={(e) => handleInputChange('calories', e.target.value)}
                 placeholder="Ex: 2000"
-                required
               />
             </div>
 
-            {selectedPatient && (
+            {/* {selectedPatient && (
               <div className="p-3 bg-blue-50 rounded-lg">
                 <p className="text-sm text-blue-800">
                   <strong>Paciente:</strong> {selectedPatient.name}
                 </p>
               </div>
-            )}
+            )} */}
           </div>
         </div>
 

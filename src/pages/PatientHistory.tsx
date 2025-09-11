@@ -54,7 +54,7 @@ const PatientHistory: React.FC = () => {
     if (consultations.length < 2) return null
 
     const sortedConsultations = [...consultations].sort((a, b) =>
-      new Date(a.date).getTime() - new Date(b.date).getTime()
+      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
     )
 
     const firstWeight = sortedConsultations[0]?.weight
@@ -107,11 +107,11 @@ const PatientHistory: React.FC = () => {
   }
 
   const sortedConsultations = [...consultations].sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   )
 
   const sortedMealPlans = [...mealPlans].sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   )
 
   const latestConsultation = sortedConsultations[0]
@@ -200,7 +200,7 @@ const PatientHistory: React.FC = () => {
                   </Button>
                 </Link>
 
-                <Link to={`/new-meal-plan?patientId=${patient.id}`}>
+                <Link to={`/meal-plans/${patient.id}/new`}>
                   <Button variant="outline" size="sm" className="w-full">
                     <ChefHat className="h-4 w-4 mr-2" />
                     Novo Plano
@@ -371,7 +371,7 @@ const PatientHistory: React.FC = () => {
                     </div>
 
                     {consultation.fatPercent && (
-                      <div className="grid grid-cols-3 gap-2 text-xs">
+                      <div className="grid grid-cols-4 gap-2 text-xs">
                         <div>
                           <span className="text-gray-500">% Gordura:</span>
                           <div className="font-medium">{consultation.fatPercent}%</div>
@@ -384,6 +384,14 @@ const PatientHistory: React.FC = () => {
                           <span className="text-gray-500">Massa Gorda:</span>
                           <div className="font-medium">{consultation.fatMass} kg</div>
                         </div>
+                        {patient.height && (
+                          <div>
+                            <span className="text-gray-500">IMC:</span>
+                            <div className="font-medium">
+                              {calculateBMI(consultation.weight, patient.height)}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
 

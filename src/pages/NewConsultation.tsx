@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,7 +13,7 @@ import { Stethoscope, ArrowLeft, Calculator } from 'lucide-react'
 
 const NewConsultation: React.FC = () => {
   const navigate = useNavigate()
-  const { patients, getPatientById } = usePatients()
+  const { patients, getPatientById, fetchPatients } = usePatients()
   const { createConsultation } = useConsultations()
   const [loading, setLoading] = useState(false)
   const { patientId } = useParams<{ patientId: string }>();
@@ -42,10 +42,19 @@ const NewConsultation: React.FC = () => {
   useEffect(() => {
     if (!formData.patientId) {
       setSelectedPatient(null)
+      const fetchPatientsFromApi = async () => {
+        try {
+          await fetchPatients();
+        } catch (err) {
+          console.error("Erro ao carregar paciente:", err)
+          setSelectedPatient(null)
+        }
+      }
+
+      fetchPatientsFromApi();
       return
     }
 
-    // se getPatientById for assíncrono
     const fetchPatient = async () => {
       try {
         const patient = await getPatientById(formData.patientId)
