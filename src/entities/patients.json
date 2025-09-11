@@ -1,0 +1,59 @@
+
+{
+  "name": "patients",
+  "options": {
+    "validator": {
+      "$jsonSchema": {
+        "bsonType": "object",
+        "required": ["name", "gender", "birthDate", "email", "userId", "createdAt"],
+        "properties": {
+          "name": {
+            "bsonType": "string",
+            "description": "Patient full name"
+          },
+          "gender": {
+            "bsonType": "string",
+            "enum": ["male", "female"],
+            "description": "Patient gender"
+          },
+          "birthDate": {
+            "bsonType": "string",
+            "title": "datetime",
+            "description": "Patient birth date in ISO format"
+          },
+          "weight": {
+            "bsonType": "number",
+            "minimum": 0,
+            "description": "Current weight in kg"
+          },
+          "height": {
+            "bsonType": "number",
+            "minimum": 0,
+            "description": "Height in cm"
+          },
+          "email": {
+            "bsonType": "string",
+            "description": "Patient email address"
+          },
+          "userId": {
+            "bsonType": "string",
+            "description": "Reference to the nutritionist user"
+          },
+          "createdAt": {
+            "bsonType": "string",
+            "title": "datetime",
+            "description": "Creation timestamp"
+          },
+          "updatedAt": {
+            "bsonType": "string",
+            "title": "datetime",
+            "description": "Last update timestamp"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "validationLevel": "moderate",
+    "validationAction": "warn"
+  }
+}

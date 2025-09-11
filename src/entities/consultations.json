@@ -1,0 +1,96 @@
+
+{
+  "name": "consultations",
+  "options": {
+    "validator": {
+      "$jsonSchema": {
+        "bsonType": "object",
+        "required": ["patientId", "date", "weight", "createdAt"],
+        "properties": {
+          "patientId": {
+            "bsonType": "string",
+            "description": "Reference to patient"
+          },
+          "date": {
+            "bsonType": "string",
+            "title": "datetime",
+            "description": "Consultation date"
+          },
+          "weight": {
+            "bsonType": "number",
+            "minimum": 0,
+            "description": "Weight in kg"
+          },
+          "triceps": {
+            "bsonType": "number",
+            "minimum": 0,
+            "description": "Triceps skinfold measurement in mm"
+          },
+          "subscapular": {
+            "bsonType": "number",
+            "minimum": 0,
+            "description": "Subscapular skinfold measurement in mm"
+          },
+          "suprailiac": {
+            "bsonType": "number",
+            "minimum": 0,
+            "description": "Suprailiac skinfold measurement in mm"
+          },
+          "abdominal": {
+            "bsonType": "number",
+            "minimum": 0,
+            "description": "Abdominal skinfold measurement in mm"
+          },
+          "waistCirc": {
+            "bsonType": "number",
+            "minimum": 0,
+            "description": "Waist circumference in cm"
+          },
+          "abdomenCirc": {
+            "bsonType": "number",
+            "minimum": 0,
+            "description": "Abdomen circumference in cm"
+          },
+          "fatFormula": {
+            "bsonType": "string",
+            "enum": ["Faulkner", "Pollock", "Jackson"],
+            "description": "Formula used for body fat calculation"
+          },
+          "fatPercent": {
+            "bsonType": "number",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Calculated body fat percentage"
+          },
+          "leanMass": {
+            "bsonType": "number",
+            "minimum": 0,
+            "description": "Calculated lean mass in kg"
+          },
+          "fatMass": {
+            "bsonType": "number",
+            "minimum": 0,
+            "description": "Calculated fat mass in kg"
+          },
+          "notes": {
+            "bsonType": "string",
+            "description": "Additional consultation notes"
+          },
+          "createdAt": {
+            "bsonType": "string",
+            "title": "datetime",
+            "description": "Creation timestamp"
+          },
+          "updatedAt": {
+            "bsonType": "string",
+            "title": "datetime",
+            "description": "Last update timestamp"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "validationLevel": "moderate",
+    "validationAction": "warn"
+  }
+}

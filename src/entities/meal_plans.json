@@ -1,0 +1,57 @@
+
+{
+  "name": "meal_plans",
+  "options": {
+    "validator": {
+      "$jsonSchema": {
+        "bsonType": "object",
+        "required": ["patientId", "date", "content", "createdAt"],
+        "properties": {
+          "patientId": {
+            "bsonType": "string",
+            "description": "Reference to patient"
+          },
+          "date": {
+            "bsonType": "string",
+            "title": "datetime",
+            "description": "Meal plan date"
+          },
+          "title": {
+            "bsonType": "string",
+            "description": "Meal plan title"
+          },
+          "content": {
+            "bsonType": "string",
+            "description": "Rich text content of the meal plan"
+          },
+          "duration": {
+            "bsonType": "string",
+            "description": "Duration of the meal plan (e.g., '1 week', '2 weeks')"
+          },
+          "calories": {
+            "bsonType": "number",
+            "minimum": 0,
+            "description": "Target daily calories"
+          },
+          "notes": {
+            "bsonType": "string",
+            "description": "Additional notes for the meal plan"
+          },
+          "createdAt": {
+            "bsonType": "string",
+            "title": "datetime",
+            "description": "Creation timestamp"
+          },
+          "updatedAt": {
+            "bsonType": "string",
+            "title": "datetime",
+            "description": "Last update timestamp"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "validationLevel": "moderate",
+    "validationAction": "warn"
+  }
+}
