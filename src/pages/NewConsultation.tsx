@@ -1,25 +1,26 @@
 
-import React, { useState, useEffect } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import React, { useState, useEffect, useMemo } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { usePatients } from '@/hooks/usePatients'
+import { Patient, usePatients } from '@/hooks/usePatients'
 import { useConsultations } from '@/hooks/useConsultations'
 import { calculateBodyFat, calculateBodyComposition, calculateAge } from '@/lib/utils'
 import { Stethoscope, ArrowLeft, Calculator } from 'lucide-react'
 
 const NewConsultation: React.FC = () => {
   const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
-  const { patients } = usePatients()
+  const { patients, getPatientById } = usePatients()
   const { createConsultation } = useConsultations()
   const [loading, setLoading] = useState(false)
-  
+  const { patientId } = useParams<{ patientId: string }>();
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
+
   const [formData, setFormData] = useState({
-    patientId: searchParams.get('patientId') || '',
+    patientId: patientId || '',
     date: new Date().toISOString().split('T')[0],
     weight: '',
     triceps: '',
@@ -28,7 +29,7 @@ const NewConsultation: React.FC = () => {
     abdominal: '',
     waistCirc: '',
     abdomenCirc: '',
-    fatFormula: '' as 'Faulkner' | 'Pollock' | 'Jackson' | '',
+    fatFormula: '' as 'Faulkner4d' | 'Pollock4d' | 'Jackson3d' | '',
     notes: ''
   })
 
@@ -38,7 +39,25 @@ const NewConsultation: React.FC = () => {
     fatMass: 0
   })
 
-  const selectedPatient = patients.find(p => p.id === formData.patientId)
+  useEffect(() => {
+    if (!formData.patientId) {
+      setSelectedPatient(null)
+      return
+    }
+
+    // se getPatientById for assíncrono
+    const fetchPatient = async () => {
+      try {
+        const patient = await getPatientById(formData.patientId)
+        setSelectedPatient(patient)
+      } catch (err) {
+        console.error("Erro ao carregar paciente:", err)
+        setSelectedPatient(null)
+      }
+    }
+
+    fetchPatient()
+  }, [formData.patientId])
 
   const calculateResults = () => {
     if (!formData.weight || !formData.fatFormula || !selectedPatient) {
@@ -76,7 +95,7 @@ const NewConsultation: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!formData.patientId || !formData.weight) return
 
     setLoading(true)
@@ -97,7 +116,7 @@ const NewConsultation: React.FC = () => {
         fatMass: calculations.fatMass || undefined,
         notes: formData.notes || undefined
       })
-      
+
       navigate('/')
     } catch (error) {
       // Error is handled by the hook
@@ -117,21 +136,21 @@ const NewConsultation: React.FC = () => {
   // Verificar se há dados suficientes para calcular
   const hasEnoughDataForCalculation = () => {
     if (!formData.weight || !formData.fatFormula || !selectedPatient) return false
-    
+
     // Verificar se há pelo menos uma medida de dobra cutânea
-    const hasMeasurements = formData.triceps || formData.subscapular || 
-                           formData.suprailiac || formData.abdominal
-    
+    const hasMeasurements = formData.triceps || formData.subscapular ||
+      formData.suprailiac || formData.abdominal
+
     return hasMeasurements
   }
 
   const getFormulaDescription = () => {
     switch (formData.fatFormula) {
-      case 'Faulkner':
+      case 'Faulkner4d':
         return 'Fórmula de Faulkner - Utiliza 4 dobras cutâneas (tríceps, subescapular, supra-ilíaca, abdominal)'
-      case 'Pollock':
+      case 'Pollock4d':
         return 'Fórmula de Pollock - Método de 4 dobras com correção por idade'
-      case 'Jackson':
+      case 'Jackson3d':
         return 'Fórmula de Jackson-Pollock - Método de 3 dobras (tríceps, subescapular, supra-ilíaca)'
       default:
         return 'Selecione uma fórmula para ver a descrição'
@@ -166,7 +185,7 @@ const NewConsultation: React.FC = () => {
               <Stethoscope className="h-5 w-5" />
               <h2 className="text-xl font-semibold">Informações Básicas</h2>
             </div>
-            
+
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="patientId">Paciente *</Label>
@@ -191,8 +210,8 @@ const NewConsultation: React.FC = () => {
               {selectedPatient && (
                 <div className="p-3 bg-blue-50 rounded-lg">
                   <p className="text-sm text-blue-800">
-                    <strong>Paciente:</strong> {selectedPatient.name} • 
-                    {calculateAge(selectedPatient.birthDate)} anos • 
+                    <strong>Paciente:</strong> {selectedPatient.name} •
+                    {calculateAge(selectedPatient.birthDate)} anos •
                     {selectedPatient.gender === 'male' ? 'Masculino' : 'Feminino'}
                   </p>
                 </div>
@@ -239,7 +258,7 @@ const NewConsultation: React.FC = () => {
           {/* Anthropometric Measurements */}
           <div className="bg-white p-6 rounded-lg shadow">
             <h2 className="text-xl font-semibold mb-6">Medidas Antropométricas</h2>
-            
+
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="fatFormula">Fórmula para % Gordura</Label>
@@ -251,9 +270,9 @@ const NewConsultation: React.FC = () => {
                     <SelectValue placeholder="Selecione a fórmula" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Faulkner">Faulkner</SelectItem>
-                    <SelectItem value="Pollock">Pollock</SelectItem>
-                    <SelectItem value="Jackson">Jackson-Pollock</SelectItem>
+                    <SelectItem value="Faulkner4d">Faulkner (4 dobras)</SelectItem>
+                    <SelectItem value="Pollock4d">Pollock (4 dobras)</SelectItem>
+                    <SelectItem value="Jackson3d">Jackson-Pollock (3 dobras)</SelectItem>
                   </SelectContent>
                 </Select>
                 {formData.fatFormula && (
@@ -356,7 +375,7 @@ const NewConsultation: React.FC = () => {
             <p className="text-sm text-gray-600 mb-6">
               Baseado na fórmula: {formData.fatFormula}
             </p>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">
                 <div className="text-3xl font-bold text-blue-600 mb-2">

@@ -20,8 +20,10 @@ function App() {
             <Route path="/patients" element={<Patients />} />
             <Route path="/patients/new" element={<NewPatient />} />
             <Route path="/patient-history/:id" element={<PatientHistory />} />
+            <Route path="/consultations/:patientId/new" element={<NewConsultation />} />
             <Route path="/consultations/new" element={<NewConsultation />} />
             <Route path="/meal-plans/new" element={<NewMealPlan />} />
+            <Route path="/meal-plans/:patientId/new" element={<NewMealPlan />} />
           </Routes>
         </main>
         <Toaster position="top-right" />

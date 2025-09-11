@@ -15,7 +15,7 @@ interface Consultation {
   abdominal?: number
   waistCirc?: number
   abdomenCirc?: number
-  fatFormula?: 'Faulkner' | 'Pollock' | 'Jackson'
+  fatFormula?: 'Faulkner4d' | 'Pollock4d' | 'Jackson3d'
   fatPercent?: number
   leanMass?: number
   fatMass?: number
@@ -127,9 +127,9 @@ export const useConsultations = (patientId?: string) => {
     }
   }, [])
 
-  useEffect(() => {
-    fetchConsultations()
-  }, [patientId])
+  // useEffect(() => {
+  //   fetchConsultations()
+  // }, [patientId])
 
   return {
     consultations,

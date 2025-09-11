@@ -5,7 +5,7 @@ import { Plus, Search, Filter, MoreVertical, User, Phone, Mail, Calendar, Trash,
 import { usePatients, Patient } from '../hooks/usePatients'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import { parseGender } from '@/lib/utils'
+import { calculateAge, parseGender } from '@/lib/utils'
 
 const Patients: React.FC = () => {
   const { patients, loading, fetchPatients, createPatient, updatePatient, deletePatient } = usePatients()
@@ -69,6 +69,8 @@ const Patients: React.FC = () => {
         birthDate: formData.get('birthDate') as string,
         phone: formData.get('phone') as string,
         email: formData.get('email') as string,
+        weight: Number(formData.get('weight')),
+        height: Number(formData.get('height')),
       })
       setEditingPatient(null)
     } catch (error) {
@@ -86,19 +88,6 @@ const Patients: React.FC = () => {
     } catch (error) {
       console.error('Erro ao deletar paciente:', error)
     }
-  }
-
-  const calculateAge = (birthDate: string) => {
-    const today = new Date()
-    const birth = new Date(birthDate)
-    let age = today.getFullYear() - birth.getFullYear()
-    const monthDiff = today.getMonth() - birth.getMonth()
-
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-      age--
-    }
-
-    return age
   }
 
   if (loading) {
@@ -274,14 +263,14 @@ const Patients: React.FC = () => {
                 </Link>
 
                 <div className="grid grid-cols-2 gap-2">
-                  <Link to={`/new-consultation?patientId=${patient.id}`}>
+                  <Link to={`/consultations/${patient.id}/new`}>
                     <Button variant="outline" size="sm" className="w-full">
                       <Stethoscope className="h-4 w-4 mr-1" />
                       Consulta
                     </Button>
                   </Link>
 
-                  <Link to={`/new-meal-plan?patientId=${patient.id}`}>
+                  <Link to={`/meal-plans/${patient.id}/new`}>
                     <Button variant="outline" size="sm" className="w-full">
                       <ChefHat className="h-4 w-4 mr-1" />
                       Plano
@@ -415,7 +404,7 @@ const Patients: React.FC = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   />
                 </div>
-                <div className="md:col-span-2">
+                {/* <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Histórico Médico
                   </label>
@@ -425,7 +414,7 @@ const Patients: React.FC = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     placeholder="Alergias, condições médicas, medicamentos em uso..."
                   />
-                </div>
+                </div> */}
               </div>
 
               <div className="flex justify-end space-x-3 mt-6">
@@ -523,6 +512,33 @@ const Patients: React.FC = () => {
                     type="email"
                     required
                     defaultValue={editingPatient.email}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Peso (Kg) *
+                  </label>
+                  <input
+                    name="weight"
+                    type="number"
+                    step={0.1}
+                    required
+                    defaultValue={editingPatient.weight}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Altura (cm) *
+                  </label>
+                  <input
+                    name="height"
+                    type="number"
+                    step={0.1}
+                    required
+                    defaultValue={editingPatient.height}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   />
                 </div>

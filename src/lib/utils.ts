@@ -46,7 +46,7 @@ export function calculateBMI(weight: number, height: number): number {
 
 // Body fat calculation formulas
 export function calculateBodyFat(
-  formula: 'Faulkner' | 'Pollock' | 'Jackson',
+  formula: 'Faulkner4d' | 'Pollock4d' | 'Jackson3d',
   measurements: {
     triceps?: number
     subscapular?: number
@@ -59,7 +59,7 @@ export function calculateBodyFat(
   const { triceps = 0, subscapular = 0, suprailiac = 0, abdominal = 0 } = measurements
 
   switch (formula) {
-    case 'Faulkner':
+    case 'Faulkner4d':
       // Faulkner formula
       if (gender === 'male') {
         return Number((0.153 * (triceps + subscapular + suprailiac + abdominal) + 5.783).toFixed(1))
@@ -67,7 +67,7 @@ export function calculateBodyFat(
         return Number((0.213 * (triceps + subscapular + suprailiac + abdominal) + 7.9).toFixed(1))
       }
 
-    case 'Pollock':
+    case 'Pollock4d':
       // Pollock 4-site formula
       const sum4 = triceps + subscapular + suprailiac + abdominal
       if (gender === 'male') {
@@ -78,7 +78,7 @@ export function calculateBodyFat(
         return Number(((495 / density) - 450).toFixed(1))
       }
 
-    case 'Jackson':
+    case 'Jackson3d':
       // Jackson-Pollock formula
       const sum3 = triceps + subscapular + suprailiac
       if (gender === 'male') {

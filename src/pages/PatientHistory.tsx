@@ -1,14 +1,15 @@
 
 import React, { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, Calendar, Weight, Ruler, FileText, TrendingUp, TrendingDown, Activity, Stethoscope, ChefHat, User, Plus } from 'lucide-react'
+import { ArrowLeft, Calendar, Weight, Ruler, FileText, TrendingUp, TrendingDown, Activity, Stethoscope, ChefHat, User, Plus, Edit } from 'lucide-react'
 import { usePatients, Patient } from '../hooks/usePatients'
 import { useConsultations } from '../hooks/useConsultations'
 import { useMealPlans } from '../hooks/useMealPlans'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { calculateBMI, parseGender } from '@/lib/utils'
+import { calculateAge, calculateBMI, parseGender } from '@/lib/utils'
+import EditPatientModal from '@/components/EditPatientModal'
 
 const PatientHistory: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -18,6 +19,8 @@ const PatientHistory: React.FC = () => {
 
   const [patient, setPatient] = useState<Patient | null>(null)
   const [loading, setLoading] = useState(true)
+  const [editingPatient, setEditingPatient] = useState<Patient | null>(null)
+  const { updatePatient } = usePatients()
 
   useEffect(() => {
     if (id) {
@@ -29,6 +32,7 @@ const PatientHistory: React.FC = () => {
     if (!id) return
 
     try {
+      console.log("resloading patient data...")
       setLoading(true)
       const patientData = await getPatientById(id)
       setPatient(patientData)
@@ -44,19 +48,6 @@ const PatientHistory: React.FC = () => {
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('pt-BR')
-  }
-
-  const calculateAge = (birthDate: string) => {
-    const today = new Date()
-    const birth = new Date(birthDate)
-    let age = today.getFullYear() - birth.getFullYear()
-    const monthDiff = today.getMonth() - birth.getMonth()
-
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-      age--
-    }
-
-    return age
   }
 
   const getWeightTrend = () => {
@@ -202,7 +193,7 @@ const PatientHistory: React.FC = () => {
               </div>
 
               <div className="flex flex-col space-y-2">
-                <Link to={`/new-consultation?patientId=${patient.id}`}>
+                <Link to={`/consultations/${patient.id}/new`}>
                   <Button size="sm" variant="outline" className="w-full">
                     <Stethoscope className="h-4 w-4 mr-2" />
                     Nova Consulta
@@ -215,11 +206,50 @@ const PatientHistory: React.FC = () => {
                     Novo Plano
                   </Button>
                 </Link>
+
+                <Button variant="outline" size="sm" className="w-full"
+                  onClick={() => { setEditingPatient(patient) }}>
+                  <Edit className="h-4 w-4 mr-2" />
+                  Editar Perfil
+                </Button>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
+
+      <EditPatientModal
+        patient={editingPatient}
+        onsubmit={async (event: React.FormEvent<HTMLFormElement>) => {
+          event.preventDefault()
+          if (!editingPatient) return
+
+          const formData = new FormData(event.currentTarget)
+
+          const updatedPatient = {
+            ...editingPatient,
+            name: formData.get('name') as string,
+            gender: formData.get('gender') as string,
+            birthDate: formData.get('birthDate') as string,
+            phone: formData.get('phone') as string,
+            email: formData.get('email') as string,
+            weight: Number(formData.get('weight')),
+            height: Number(formData.get('height')),
+          }
+
+          try {
+            const {data} = await updatePatient(editingPatient.id, updatedPatient)
+            setPatient(data)
+            setEditingPatient(null)
+          } catch (error) {
+            console.error('Erro ao atualizar paciente:', error)
+          }
+        }}
+
+        oncancel={() => {
+          setEditingPatient(null)
+        }}
+      />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -312,7 +342,7 @@ const PatientHistory: React.FC = () => {
               <div className="text-center py-8">
                 <Stethoscope className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-600 mb-4">Nenhuma consulta registrada</p>
-                <Link to={`/new-consultation?patientId=${patient.id}`}>
+                <Link to={`/consultations/${patient.id}/new`}>
                   <Button size="sm">
                     <Plus className="h-4 w-4 mr-2" />
                     Primeira Consulta
@@ -409,14 +439,14 @@ const PatientHistory: React.FC = () => {
       </div>
 
       {/* Medical History */}
-      {patient.medicalHistory && (
+      {/* {patient.medicalHistory && (
         <div className="mt-8 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Histórico Médico</h2>
           <div className="bg-gray-50 p-4 rounded-lg">
             <p className="text-gray-700 whitespace-pre-wrap">{patient.medicalHistory}</p>
           </div>
         </div>
-      )}
+      )} */}
     </div>
   )
 }

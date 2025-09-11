@@ -76,8 +76,9 @@ export const usePatients = () => {
       await fetchPatients()
       toast.success('Paciente removido com sucesso!')
     } catch (error) {
-      console.error('Failed to delete patient:', error.response.data.message)
-      toast.error(error?.response?.data?.message ?? 'Erro ao remover paciente')
+      const err = error as { response?: { data?: { message?: string } } }
+      console.error('Failed to delete patient:', err.response?.data?.message)
+      toast.error(err.response?.data?.message ?? 'Erro ao remover paciente')
       throw error
     }
   }
@@ -108,9 +109,9 @@ export const usePatients = () => {
     }
   }, [patients])
 
-  useEffect(() => {
-    fetchPatients()
-  }, [])
+  // useEffect(() => {
+  //   fetchPatients()
+  // }, [])
 
   return {
     patients,

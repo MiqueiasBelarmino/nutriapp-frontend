@@ -30,7 +30,7 @@ const Dashboard: React.FC = () => {
     fetchPatients()
     fetchConsultations()
     fetchMealPlans()
-  }, [fetchPatients, fetchConsultations, fetchMealPlans])
+  }, [])
 
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0]
@@ -64,14 +64,14 @@ const Dashboard: React.FC = () => {
       title: 'Nova Consulta',
       description: 'Agendar consulta',
       icon: CalendarDays,
-      link: '/consultations',
+      link: '/consultations/new',
       color: 'bg-green-500 hover:bg-green-600'
     },
     {
       title: 'Plano Alimentar',
       description: 'Criar novo plano',
       icon: FileText,
-      link: '/meal-plans',
+      link: '/meal-plans/new',
       color: 'bg-purple-500 hover:bg-purple-600'
     }
   ]
@@ -125,7 +125,7 @@ const Dashboard: React.FC = () => {
               <div>
                 <p className="text-sm font-medium text-gray-600 mb-1">{stat.title}</p>
                 <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-                <p className="text-sm text-green-600 mt-1">{stat.change} vs mês anterior</p>
+                {/* <p className="text-sm text-green-600 mt-1">{stat.change} vs mês anterior</p> */}
               </div>
               <div className={`p-3 rounded-lg ${stat.color}`}>
                 <stat.icon className="w-6 h-6" />
@@ -191,7 +191,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Activity Feed */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        {/* <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold text-gray-900">Atividade Recente</h2>
             <TrendingUp className="w-5 h-5 text-gray-400" />
@@ -212,7 +212,7 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   )
