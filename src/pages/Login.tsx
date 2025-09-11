@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
@@ -20,6 +19,9 @@ const Login: React.FC = () => {
   const { signIn, isAuthenticated } = useAuth()
   const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState(false)
+  const [showModal, setShowModal] = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -27,15 +29,17 @@ const Login: React.FC = () => {
     }
   }, [isAuthenticated, navigate])
 
-  const handleLogin = async () => {
+  const handleLogin = async (e?: React.FormEvent) => {
+    e?.preventDefault()
     setIsLoading(true)
     try {
-      await signIn()
-      toast.success('Login realizado com sucesso!')
+      await signIn(email, password)
+      toast.success('Login realizado com sucesso!', { duration: 2000 })
+      setShowModal(false)
       navigate('/')
     } catch (error) {
       console.error('Erro no login:', error)
-      toast.error('Erro ao fazer login. Tente novamente.')
+      toast.error('Usuário ou senha inválidos')
     } finally {
       setIsLoading(false)
     }
@@ -100,11 +104,10 @@ const Login: React.FC = () => {
             <div className="hidden md:flex items-center space-x-6">
               <span className="text-gray-600">Já tem uma conta?</span>
               <button
-                onClick={handleLogin}
-                disabled={isLoading}
-                className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                onClick={() => setShowModal(true)}
+                className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"
               >
-                {isLoading ? 'Entrando...' : 'Entrar'}
+                Entrar
               </button>
             </div>
           </div>
@@ -130,33 +133,18 @@ const Login: React.FC = () => {
               
               <div className="flex flex-col sm:flex-row gap-4">
                 <button
-                  onClick={handleLogin}
-                  disabled={isLoading}
-                  className="bg-gradient-to-r from-green-600 to-green-700 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:from-green-700 hover:to-green-800 transition-all transform hover:scale-105 shadow-lg disabled:opacity-50"
+                  onClick={() => setShowModal(true)}
+                  className="bg-gradient-to-r from-green-600 to-green-700 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:from-green-700 hover:to-green-800 transition-all transform hover:scale-105 shadow-lg"
                 >
-                  {isLoading ? 'Entrando...' : 'Começar Agora'}
+                  Começar Agora
                 </button>
                 <button className="border-2 border-green-600 text-green-600 px-8 py-4 rounded-xl text-lg font-semibold hover:bg-green-50 transition-colors">
                   Ver Demonstração
                 </button>
               </div>
-
-              <div className="grid grid-cols-3 gap-8 pt-8 border-t border-gray-200">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-green-600">500+</div>
-                  <div className="text-gray-600">Nutricionistas</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-green-600">10k+</div>
-                  <div className="text-gray-600">Pacientes</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-green-600">98%</div>
-                  <div className="text-gray-600">Satisfação</div>
-                </div>
-              </div>
             </div>
 
+            {/* Card de exemplo */}
             <div className="relative">
               <div className="bg-white rounded-2xl shadow-2xl p-8 transform rotate-3 hover:rotate-0 transition-transform duration-300">
                 <div className="space-y-6">
@@ -265,11 +253,10 @@ const Login: React.FC = () => {
                 </div>
                 
                 <button
-                  onClick={handleLogin}
-                  disabled={isLoading}
-                  className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-4 rounded-xl text-lg font-semibold hover:from-green-700 hover:to-green-800 transition-all transform hover:scale-105 disabled:opacity-50"
+                  onClick={() => setShowModal(true)}
+                  className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-4 rounded-xl text-lg font-semibold hover:from-green-700 hover:to-green-800 transition-all transform hover:scale-105"
                 >
-                  {isLoading ? 'Entrando...' : 'Começar Teste Grátis'}
+                  Começar Teste Grátis
                 </button>
                 
                 <p className="text-center text-sm text-gray-500 mt-4">
@@ -302,6 +289,51 @@ const Login: React.FC = () => {
           </div>
         </div>
       </footer>
+
+      {/* Modal Login */}
+      {showModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 relative">
+            <button
+              onClick={() => setShowModal(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+            >
+              ✕
+            </button>
+            <h2 className="text-2xl font-bold text-center text-gray-900 mb-6">
+              Acesse sua conta
+            </h2>
+            <form onSubmit={handleLogin} className="space-y-4">
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500"
+                required
+              />
+              <input
+                type="password"
+                placeholder="Senha"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500"
+                required
+              />
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-3 rounded-lg font-semibold hover:from-green-700 hover:to-green-800 transition-all disabled:opacity-50"
+              >
+                {isLoading ? 'Entrando...' : 'Entrar'}
+              </button>
+            </form>
+            <p className="text-center text-sm text-gray-500 mt-4">
+              Esqueceu sua senha? <a href="#" className="text-green-600 hover:underline">Recuperar</a>
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
