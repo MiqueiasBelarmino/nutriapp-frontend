@@ -1,6 +1,6 @@
 
+import api from '@/lib/api'
 import { useState, useCallback } from 'react'
-import { lumi } from '../lib/lumi'
 import toast from 'react-hot-toast'
 
 export interface MealPlan {
@@ -8,7 +8,7 @@ export interface MealPlan {
   patientId: string
   date: string
   content: string
-  calories: number
+  // calories: number
   notes?: string
   createdAt: string
   updatedAt: string
@@ -21,8 +21,8 @@ export const useMealPlans = () => {
   const fetchMealPlans = useCallback(async () => {
     setLoading(true)
     try {
-      const { list } = await lumi.entities.mealPlans.list()
-      setMealPlans(list as unknown as MealPlan[])
+      const { data } = await api.get('/meal-plans');
+      setMealPlans(data as unknown as MealPlan[])
     } catch (error) {
       console.error('Erro ao buscar planos alimentares:', error)
       toast.error('Erro ao carregar planos alimentares')
@@ -33,12 +33,12 @@ export const useMealPlans = () => {
 
   const fetchMealPlansByPatient = useCallback(async (patientId: string) => {
     try {
-      const { list } = await lumi.entities.mealPlans.list()
-      const allMealPlans = list as unknown as MealPlan[]
+      const { data } = await api.get('/meal-plans');
+      const allMealPlans = data as unknown as MealPlan[];
       const patientMealPlans = allMealPlans.filter(
         (mealPlan) => mealPlan.patientId === patientId
-      )
-      setMealPlans(patientMealPlans)
+      );
+      setMealPlans(patientMealPlans);
     } catch (error) {
       console.error('Erro ao buscar planos do paciente:', error)
       toast.error('Erro ao carregar planos do paciente')
@@ -47,7 +47,7 @@ export const useMealPlans = () => {
 
   const createMealPlan = async (mealPlanData: Omit<MealPlan, 'id' | 'createdAt' | 'updatedAt'>) => {
     try {
-      const newMealPlan = await lumi.entities.mealPlans.create({
+      const newMealPlan = await api.post('/meal-plans', {
         ...mealPlanData,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
@@ -64,7 +64,7 @@ export const useMealPlans = () => {
 
   const updateMealPlan = async (id: string, updates: Partial<MealPlan>) => {
     try {
-      const updatedMealPlan = await lumi.entities.mealPlans.update(id, {
+      const updatedMealPlan = await api.put(`/meal-plans/${id}`, {
         ...updates,
         updatedAt: new Date().toISOString()
       })
@@ -80,7 +80,7 @@ export const useMealPlans = () => {
 
   const deleteMealPlan = async (id: string) => {
     try {
-      await lumi.entities.mealPlans.delete(id)
+      await api.delete(`/meal-plans/${id}`)
       await fetchMealPlans()
       toast.success('Plano alimentar excluído com sucesso')
     } catch (error) {

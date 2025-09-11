@@ -13,6 +13,7 @@ const NewPatient = lazy(() => import('./pages/NewPatient').catch(() => ({ defaul
 const PatientHistory = lazy(() => import('./pages/PatientHistory').catch(() => ({ default: () => <div>Erro ao carregar Histórico</div> })))
 const NewConsultation = lazy(() => import('./pages/NewConsultation').catch(() => ({ default: () => <div>Erro ao carregar Nova Consulta</div> })))
 const NewMealPlan = lazy(() => import('./pages/NewMealPlan').catch(() => ({ default: () => <div>Erro ao carregar Novo Plano</div> })))
+const MealPlanDetail = lazy(() => import('./pages/MealPlanDetail').catch(() => ({ default: () => <div>Erro ao carregar Detalhes do Plano</div> })))
 
 // Componente de Loading
 const LoadingSpinner = () => (
@@ -171,7 +172,12 @@ function App() {
                       <Route path="/new-patient" element={<NewPatient />} />
                       <Route path="/patient-history/:id" element={<PatientHistory />} />
                       <Route path="/new-consultation" element={<NewConsultation />} />
+                      <Route path="/consultations/:patientId/new" element={<NewConsultation />} />
+                      <Route path="/consultations/new" element={<NewConsultation />} />
                       <Route path="/new-meal-plan" element={<NewMealPlan />} />
+                      <Route path="/meal-plans/new" element={<NewMealPlan />} />
+                      <Route path="/meal-plan/:id" element={<MealPlanDetail />} />
+                      <Route path="/meal-plans/:patientId/new" element={<NewMealPlan />} />
                       <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>
                   </Suspense>

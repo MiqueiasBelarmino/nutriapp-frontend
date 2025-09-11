@@ -138,9 +138,9 @@ const Login: React.FC = () => {
                 >
                   Começar Agora
                 </button>
-                <button className="border-2 border-green-600 text-green-600 px-8 py-4 rounded-xl text-lg font-semibold hover:bg-green-50 transition-colors">
+                {/* <button className="border-2 border-green-600 text-green-600 px-8 py-4 rounded-xl text-lg font-semibold hover:bg-green-50 transition-colors">
                   Ver Demonstração
-                </button>
+                </button> */}
               </div>
             </div>
 

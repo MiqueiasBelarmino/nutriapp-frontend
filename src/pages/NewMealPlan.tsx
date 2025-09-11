@@ -22,7 +22,7 @@ const NewMealPlan: React.FC = () => {
     patientId: patientId || '',
     date: new Date().toISOString().split('T')[0],
     content: '',
-    calories: '',
+    // calories: '',
     notes: ''
   })
 
@@ -33,7 +33,7 @@ const NewMealPlan: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!formData.patientId || !formData.content || !formData.calories) return
+    if (!formData.patientId || !formData.content) return
 
     setLoading(true)
     try {
@@ -41,7 +41,7 @@ const NewMealPlan: React.FC = () => {
         patientId: formData.patientId,
         date: new Date(formData.date).toISOString(),
         content: formData.content,
-        calories: Number(formData.calories) || 0,
+        // calories: Number(formData.calories) || 0,
         notes: formData.notes || undefined
       })
       
@@ -70,7 +70,7 @@ const NewMealPlan: React.FC = () => {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => navigate('/')}
+          onClick={() => navigate(-1)}
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Voltar
@@ -123,7 +123,7 @@ const NewMealPlan: React.FC = () => {
               />
             </div>
 
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <Label htmlFor="calories">Calorias Totais</Label>
               <Input
                 id="calories"
@@ -133,7 +133,7 @@ const NewMealPlan: React.FC = () => {
                 onChange={(e) => handleInputChange('calories', e.target.value)}
                 placeholder="Ex: 2000"
               />
-            </div>
+            </div> */}
 
             {/* {selectedPatient && (
               <div className="p-3 bg-blue-50 rounded-lg">
@@ -183,7 +183,7 @@ const NewMealPlan: React.FC = () => {
           </Button>
           <Button
             type="submit"
-            disabled={loading || !formData.patientId || !formData.content || !formData.calories}
+            disabled={loading || !formData.patientId || !formData.content}
           >
             {loading ? 'Salvando...' : 'Salvar Plano'}
           </Button>

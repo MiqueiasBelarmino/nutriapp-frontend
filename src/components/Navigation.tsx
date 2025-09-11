@@ -33,12 +33,6 @@ const Navigation = () => {
       isActive: isActive('/patients')
     },
     {
-      to: '/new-patient',
-      icon: UserPlus,
-      label: 'Novo Paciente',
-      isActive: isActive('/new-patient')
-    },
-    {
       to: '/new-consultation',
       icon: Calendar,
       label: 'Nova Consulta',

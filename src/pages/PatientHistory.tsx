@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, Calendar, Weight, Ruler, FileText, TrendingUp, TrendingDown, Activity, Stethoscope, ChefHat, User, Plus, Edit } from 'lucide-react'
+import { useParams, Link, useNavigate } from 'react-router-dom'
+import { ArrowLeft, Calendar, Weight, Ruler, FileText, TrendingUp, TrendingDown, Activity, Stethoscope, ChefHat, User, Plus, Edit, Eye, Utensils, Clock } from 'lucide-react'
 import { usePatients, Patient } from '../hooks/usePatients'
 import { useConsultations } from '../hooks/useConsultations'
 import { useMealPlans } from '../hooks/useMealPlans'
@@ -10,6 +10,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { calculateAge, calculateBMI, parseGender } from '@/lib/utils'
 import EditPatientModal from '@/components/EditPatientModal'
+import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
+import { Badge } from '@/components/ui/badge'
 
 const PatientHistory: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -21,6 +24,7 @@ const PatientHistory: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [editingPatient, setEditingPatient] = useState<Patient | null>(null)
   const { updatePatient } = usePatients()
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (id) {
@@ -32,7 +36,6 @@ const PatientHistory: React.FC = () => {
     if (!id) return
 
     try {
-      console.log("resloading patient data...")
       setLoading(true)
       const patientData = await getPatientById(id)
       setPatient(patientData)
@@ -238,7 +241,7 @@ const PatientHistory: React.FC = () => {
           }
 
           try {
-            const {data} = await updatePatient(editingPatient.id, updatedPatient)
+            const { data } = await updatePatient(editingPatient.id, updatedPatient)
             setPatient(data)
             setEditingPatient(null)
           } catch (error) {
@@ -408,7 +411,7 @@ const PatientHistory: React.FC = () => {
         </Card>
 
         {/* Planos Alimentares */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        {/* <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-6">Planos Alimentares</h2>
 
           {mealPlans.length > 0 ? (
@@ -443,7 +446,59 @@ const PatientHistory: React.FC = () => {
               Nenhum plano alimentar criado ainda
             </p>
           )}
-        </div>
+        </div> */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="flex items-center space-x-2">
+              <Utensils className="h-5 w-5" />
+              <span>Planos Alimentares Recentes</span>
+            </CardTitle>
+            <Button variant="outline" size="sm" onClick={() => navigate('/new-meal-plan')}>
+              Criar novo
+            </Button>
+          </CardHeader>
+          <CardContent>
+            {mealPlans.length > 0 ? (
+              <div className="space-y-4">
+                {mealPlans.map((mealPlan) => (
+                  <div
+                    key={mealPlan.id}
+                    className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">
+                        Criado em:
+                      </p>
+                      <div className="flex items-center space-x-2 mt-1">
+                        <Clock className="h-3 w-3 text-gray-400" />
+                        <p className="text-xs text-gray-600">
+                          {format(new Date(mealPlan.date), "dd/MM/yyyy", { locale: ptBR })}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      {/* <Badge variant="secondary">
+                        {mealPlan.calories} kcal
+                      </Badge> */}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => navigate(`/meal-plan/${mealPlan.id}`)}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <Utensils className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600">Nenhum plano alimentar criado</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       {/* Medical History */}
