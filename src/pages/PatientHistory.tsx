@@ -12,7 +12,6 @@ import { calculateAge, calculateBMI, parseGender } from '@/lib/utils'
 import EditPatientModal from '@/components/EditPatientModal'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { Badge } from '@/components/ui/badge'
 
 const PatientHistory: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -112,12 +111,6 @@ const PatientHistory: React.FC = () => {
   const sortedConsultations = [...consultations].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   )
-
-  const sortedMealPlans = [...mealPlans].sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  )
-
-  const latestConsultation = sortedConsultations[0]
 
   const weightTrend = getWeightTrend()
 

@@ -37,8 +37,6 @@ const NewPatient: React.FC = () => {
         birthDate: formData.birthDate,
         phone: formData.phone,
         email: formData.email,
-        address: formData.address,
-        medicalHistory: formData.medicalHistory || undefined
       })
       
       navigate('/patients')

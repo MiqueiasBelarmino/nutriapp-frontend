@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -60,8 +60,6 @@ const NewMealPlan: React.FC = () => {
   const handleSelectChange = (field: string) => (value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
-
-  const selectedPatient = patients.find(p => p.id === formData.patientId)
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">

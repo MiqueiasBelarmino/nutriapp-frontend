@@ -5,7 +5,6 @@ import {
   Users, 
   CalendarDays, 
   FileText, 
-  TrendingUp,
   Plus,
   Activity,
   Clock,

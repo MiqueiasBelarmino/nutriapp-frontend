@@ -1,7 +1,7 @@
 
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
-import {Users, Calendar, FileText, Home, LogOut, UserPlus, ChefHat} from 'lucide-react'
+import {Users, Calendar, FileText, Home, LogOut, ChefHat} from 'lucide-react'
 
 const Navigation = () => {
   const location = useLocation()
