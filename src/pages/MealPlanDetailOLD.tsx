@@ -8,25 +8,23 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { usePatients } from '@/hooks/usePatients'
-import { useMealPlans } from '@/hooks/useMealPlans'
+import { useMealPlans, type MealPlan } from '@/hooks/useMealPlans'
 import RichTextEditor from '@/components/RichTextEditor'
-import { ArrowLeft, Utensils, Edit3, Save, X, Calendar, User, FileText, Clock } from 'lucide-react'
+import {ArrowLeft, Utensils, Edit3, Save, X, Calendar, User, FileText, Clock} from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { MealPlan } from '@/types/meal-plan.interface'
-import { Meal } from '@/types/meal.interface'
 
 const MealPlanDetail: React.FC = () => {
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
   const { patients, fetchPatients } = usePatients()
   const { mealPlans, fetchMealPlans, updateMealPlan } = useMealPlans()
-
+  
   const [mealPlan, setMealPlan] = useState<MealPlan | null>(null)
   const [isEditing, setIsEditing] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-
+  
   const [formData, setFormData] = useState({
     patientId: '',
     date: '',
@@ -38,14 +36,14 @@ const MealPlanDetail: React.FC = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        await Promise.all([fetchPatients(), fetchMealPlans(id)])
+        await Promise.all([fetchPatients(), fetchMealPlans()])
       } catch (error) {
         console.error('Erro ao carregar dados:', error)
       } finally {
         setLoading(false)
       }
     }
-
+    
     loadData()
   }, [fetchPatients, fetchMealPlans])
 
@@ -54,14 +52,13 @@ const MealPlanDetail: React.FC = () => {
       const foundMealPlan = mealPlans.find(mp => mp.id === id)
       if (foundMealPlan) {
         setMealPlan(foundMealPlan)
-        console.log(foundMealPlan)
-        // setFormData({
-        //   patientId: foundMealPlan.patientId,
-        //   date: foundMealPlan.date.split('T')[0],
-        //   content: foundMealPlan.content,
-        // //   calories: foundMealPlan.calories.toString(),
-        //   notes: foundMealPlan.notes || ''
-        // })
+        setFormData({
+          patientId: foundMealPlan.patientId,
+          date: foundMealPlan.date.split('T')[0],
+          content: foundMealPlan.content,
+        //   calories: foundMealPlan.calories.toString(),
+          notes: foundMealPlan.notes || ''
+        })
       }
     }
   }, [id, mealPlans])
@@ -73,17 +70,17 @@ const MealPlanDetail: React.FC = () => {
 
     setSaving(true)
     try {
-      // await updateMealPlan(mealPlan.id, {
-      //   patientId: formData.patientId,
-      //   date: new Date(formData.date).toISOString(),
-      //   content: formData.content,
-      //   // calories: Number(formData.calories),
-      //   notes: formData.notes || undefined
-      // })
-
+      await updateMealPlan(mealPlan.id, {
+        patientId: formData.patientId,
+        date: new Date(formData.date).toISOString(),
+        content: formData.content,
+        // calories: Number(formData.calories),
+        notes: formData.notes || undefined
+      })
+      
       setIsEditing(false)
       // Recarregar dados
-      await fetchMealPlans(id)
+      await fetchMealPlans()
     } catch (error) {
       console.error('Erro ao salvar:', error)
     } finally {
@@ -92,16 +89,16 @@ const MealPlanDetail: React.FC = () => {
   }
 
   const handleCancel = () => {
-    // if (mealPlan) {
-    //   setFormData({
-    //     patientId: mealPlan.patientId,
-    //     date: mealPlan.date.split('T')[0],
-    //     content: mealPlan.content,
-    //     // calories: mealPlan.calories.toString(),
-    //     notes: mealPlan.notes || ''
-    //   })
-    // }
-    // setIsEditing(false)
+    if (mealPlan) {
+      setFormData({
+        patientId: mealPlan.patientId,
+        date: mealPlan.date.split('T')[0],
+        content: mealPlan.content,
+        // calories: mealPlan.calories.toString(),
+        notes: mealPlan.notes || ''
+      })
+    }
+    setIsEditing(false)
   }
 
   const handleInputChange = (field: string, value: string) => {
@@ -163,7 +160,7 @@ const MealPlanDetail: React.FC = () => {
             </p>
           </div>
         </div>
-
+        
         <div className="flex space-x-2">
           {!isEditing ? (
             <Button onClick={() => setIsEditing(true)}>
@@ -176,7 +173,7 @@ const MealPlanDetail: React.FC = () => {
                 <X className="h-4 w-4 mr-2" />
                 Cancelar
               </Button>
-              <Button
+              <Button 
                 onClick={handleSave}
                 disabled={saving || !formData.patientId || !formData.content}
               >
@@ -238,7 +235,7 @@ const MealPlanDetail: React.FC = () => {
                     </p>
                   </div>
                 </div>
-
+                
                 {/* <div className="flex items-center space-x-2">
                   <Zap className="h-4 w-4 text-gray-500" />
                   <div>
@@ -249,25 +246,25 @@ const MealPlanDetail: React.FC = () => {
                   </div>
                 </div> */}
               </div>
-
+              
               <div className="space-y-4">
                 <div className="flex items-center space-x-2">
                   <Clock className="h-4 w-4 text-gray-500" />
                   <div>
                     <p className="text-sm text-gray-600">Criado em</p>
                     <p className="font-medium">
-                      {format(new Date(mealPlan.createdAt ?? ''), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                      {format(new Date(mealPlan.createdAt), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
                     </p>
                   </div>
                 </div>
-
+                
                 {mealPlan.updatedAt !== mealPlan.createdAt && (
                   <div className="flex items-center space-x-2">
                     <Edit3 className="h-4 w-4 text-gray-500" />
                     <div>
                       <p className="text-sm text-gray-600">Última atualização</p>
                       <p className="font-medium">
-                        {format(new Date(mealPlan.updatedAt ?? ''), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                        {format(new Date(mealPlan.updatedAt), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
                       </p>
                     </div>
                   </div>
@@ -329,48 +326,17 @@ const MealPlanDetail: React.FC = () => {
       {/* Plan Content */}
       <Card>
         <CardHeader>
-          {/* <CardTitle className="flex items-center space-x-2">
+          <CardTitle className="flex items-center space-x-2">
             <FileText className="h-5 w-5" />
-            <span>Conteúdo</span>
-          </CardTitle> */}
+            <span>Conteúdo do Plano Alimentar</span>
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {!isEditing ? (
-            <div className="">
-              {mealPlan.Meal.map((meal, index) => (
-
-                <Card className='mb-6' key={index}>
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <span>{meal.name}</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="">
-                      {meal.items.map((item) => (
-                        <div>
-                          <p key={item.id}
-                             className="font-bold mt-2 pl-4 relative before:content-['•'] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2"
-                          >
-                            {item.quantity} {item.foodName}
-                          </p>
-
-                          {/* iterate Substitutes array to display in single line, separated by commas */}
-                          {item.substitutes && item.substitutes.length > 0 && (
-                            <p className="text-gray-500 italic">
-                              Substitutos: {item.substitutes.map(sub => `${sub.quantity} ${sub.foodName}`).join(', ')}
-                            </p>
-                          )}
-                        </div>
-                      ))}
-
-                    </div>
-                  </CardContent>
-                </Card>
-
-
-              ))}
-            </div>
+            <div 
+              className="prose prose-sm max-w-none"
+              dangerouslySetInnerHTML={{ __html: mealPlan.content }}
+            />
           ) : (
             <div className="space-y-2">
               <Label>Plano Alimentar Detalhado *</Label>

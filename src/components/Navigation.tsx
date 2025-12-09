@@ -55,7 +55,7 @@ const Navigation = () => {
             <div className="flex items-center space-x-2">
               <FileText className="h-8 w-8 text-green-600" />
               <span className="text-xl font-bold text-gray-900">
-                NutriDash
+                NutriApp
               </span>
             </div>
           </div>

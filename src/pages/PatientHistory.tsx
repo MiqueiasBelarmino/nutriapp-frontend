@@ -446,9 +446,6 @@ const PatientHistory: React.FC = () => {
               <Utensils className="h-5 w-5" />
               <span>Planos Alimentares Recentes</span>
             </CardTitle>
-            <Button variant="outline" size="sm" onClick={() => navigate('/new-meal-plan')}>
-              Criar novo
-            </Button>
           </CardHeader>
           <CardContent>
             {mealPlans.length > 0 ? (
@@ -460,14 +457,9 @@ const PatientHistory: React.FC = () => {
                   >
                     <div className="flex-1">
                       <p className="font-medium text-sm">
-                        Criado em:
+                        Criado em: <span className='text-gray-600'>{format(new Date(mealPlan.createdAt ?? ''), "dd/MM/yyyy HH:mm", { locale: ptBR })}</span>
                       </p>
-                      <div className="flex items-center space-x-2 mt-1">
-                        <Clock className="h-3 w-3 text-gray-400" />
-                        <p className="text-xs text-gray-600">
-                          {format(new Date(mealPlan.date), "dd/MM/yyyy", { locale: ptBR })}
-                        </p>
-                      </div>
+
                     </div>
                     <div className="flex items-center space-x-2">
                       {/* <Badge variant="secondary">
