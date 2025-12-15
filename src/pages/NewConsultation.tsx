@@ -126,7 +126,7 @@ const NewConsultation: React.FC = () => {
         notes: formData.notes || undefined
       })
 
-      navigate('/')
+      navigate(-1);
     } catch (error) {
       // Error is handled by the hook
     } finally {

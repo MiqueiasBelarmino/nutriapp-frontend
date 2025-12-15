@@ -495,23 +495,15 @@ const NewMealPlan: React.FC = () => {
                                   {item.substitutes.map((substitute: any) => (
                                     <div key={substitute.id} className="flex items-center gap-2 bg-white p-2 rounded border border-slate-200">
                                       <div className="flex-1 grid md:grid-cols-2 gap-2">
-                                        {/* <Input
-                                          value={substitute.name}
-                                          onChange={(e) => updateSubstitute(meal.id, item.id, substitute.id, 'name', e.target.value)}
-                                          placeholder="Ex: Batata doce"
-                                          className="h-8 text-sm"
-                                        /> */}
                                         <FoodAutocomplete
                                           value={substitute.name}
                                           onChange={(value) =>
                                             updateSubstitute(meal.id, item.id, substitute.id, "name", value)
                                           }
-                                          placeholder="Ex: Batata doce"
                                         />
                                         <Input
                                           value={substitute.quantity}
                                           onChange={(e) => updateSubstitute(meal.id, item.id, substitute.id, 'quantity', e.target.value)}
-                                          placeholder="Ex: 1 unidade média"
                                           className="h-8 text-sm"
                                         />
                                       </div>
@@ -573,10 +565,9 @@ const NewMealPlan: React.FC = () => {
           </Button>
           <Button
             type="submit"
-          // disabled={loading || !formData.patientId}
+            // disabled={loading || !formData.patientId || meals.length === 0 || !meals.some(meal => meal.items.some(item => item.foodId))}
           >
-            ssss
-            {/* {loading ? 'Salvando...' : 'Salvar Plano'} */}
+            {loading ? 'Salvando...' : 'Salvar Plano'}
           </Button>
         </div>
       </form>
