@@ -681,7 +681,7 @@ const MealPlanDetail: React.FC = () => {
                           <CardContent className="space-y-4">
                             {/* Items */}
                             <div className="space-y-3">
-                              {meal.items.map((item: LocalMealItem, itemIndex: number) => (
+                              {meal.items.map((item: LocalMealItem) => (
                                 <div key={item.id} className="border border-slate-200 rounded-lg p-4 bg-slate-50">
                                   <div className="flex items-start gap-3 mb-3">
                                     <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-2">

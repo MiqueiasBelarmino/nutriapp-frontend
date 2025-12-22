@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Calendar, Weight, Ruler, FileText, TrendingUp, TrendingDown, Activity, Stethoscope, ChefHat, User, Plus, Edit, Eye, Utensils, Clock } from 'lucide-react'
+import { ArrowLeft, Calendar, Weight, Ruler, FileText, TrendingUp, TrendingDown, Activity, Stethoscope, ChefHat, User, Plus, Edit, Eye, Utensils } from 'lucide-react'
 import { usePatients, Patient } from '../hooks/usePatients'
 import { useConsultations } from '../hooks/useConsultations'
 import { useMealPlans } from '../hooks/useMealPlans'

@@ -8,4 +8,5 @@ export interface MealPlan {
   notes?: string
   createdAt?: string
   updatedAt?: string
+  content?: any
 }

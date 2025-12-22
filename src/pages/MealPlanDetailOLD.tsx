@@ -8,11 +8,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { usePatients } from '@/hooks/usePatients'
-import { useMealPlans, type MealPlan } from '@/hooks/useMealPlans'
+import { useMealPlans } from '@/hooks/useMealPlans'
 import RichTextEditor from '@/components/RichTextEditor'
 import {ArrowLeft, Utensils, Edit3, Save, X, Calendar, User, FileText, Clock} from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { MealPlan } from '@/types/meal-plan.interface'
 
 const MealPlanDetail: React.FC = () => {
   const navigate = useNavigate()
@@ -253,7 +254,7 @@ const MealPlanDetail: React.FC = () => {
                   <div>
                     <p className="text-sm text-gray-600">Criado em</p>
                     <p className="font-medium">
-                      {format(new Date(mealPlan.createdAt), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                      {format(new Date(mealPlan.createdAt ?? ''), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
                     </p>
                   </div>
                 </div>
@@ -264,7 +265,7 @@ const MealPlanDetail: React.FC = () => {
                     <div>
                       <p className="text-sm text-gray-600">Última atualização</p>
                       <p className="font-medium">
-                        {format(new Date(mealPlan.updatedAt), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                        {format(new Date(mealPlan.updatedAt ?? ''), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
                       </p>
                     </div>
                   </div>
