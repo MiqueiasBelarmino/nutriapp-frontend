@@ -15,8 +15,6 @@ import { ArrowLeft, Utensils, Edit3, Save, X, Calendar, User, FileText, Clock, P
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { MealPlan } from '@/types/meal-plan.interface'
-import { Meal } from '@/types/meal.interface'
-import { MealItem } from '@/types/meal-item.interface'
 
 interface Substitute {
   id: string
@@ -45,7 +43,7 @@ const MealPlanDetail: React.FC = () => {
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
   const { patients, fetchPatients } = usePatients()
-  const { mealPlans, fetchMealPlans, updateMealPlan } = useMealPlans()
+  const { mealPlans, fetchMealPlans, updateMealPlan, deleteMealPlan } = useMealPlans()
 
   const [mealPlan, setMealPlan] = useState<MealPlan | null>(null)
   const [isEditing, setIsEditing] = useState(false)
@@ -155,6 +153,19 @@ const MealPlanDetail: React.FC = () => {
       alert('Erro ao salvar: ' + (error instanceof Error ? error.message : String(error)))
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!mealPlan) return
+
+    if (window.confirm('Tem certeza que deseja excluir este plano alimentar? Esta ação não pode ser desfeita.')) {
+      try {
+        await deleteMealPlan(mealPlan.id)
+        navigate(-1)
+      } catch (error) {
+        console.error('Erro ao excluir:', error)
+      }
     }
   }
 
@@ -379,10 +390,16 @@ const MealPlanDetail: React.FC = () => {
 
         <div className="flex space-x-2">
           {!isEditing ? (
-            <Button onClick={() => setIsEditing(true)}>
-              <Edit3 className="h-4 w-4 mr-2" />
-              Editar
-            </Button>
+            <>
+              <Button variant="outline" onClick={() => setIsEditing(true)}>
+                <Edit3 className="h-4 w-4 mr-2" />
+                Editar
+              </Button>
+              <Button variant="destructive" onClick={handleDelete}>
+                <Trash2 className="h-4 w-4 mr-2" />
+                Excluir
+              </Button>
+            </>
           ) : (
             <>
               <Button variant="outline" onClick={handleCancel}>
@@ -606,14 +623,6 @@ const MealPlanDetail: React.FC = () => {
                     <List className="w-5 h-5" />
                     Refeições
                   </CardTitle>
-                  <Button
-                    type="button"
-                    onClick={addMeal}
-                    className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Adicionar Refeição
-                  </Button>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -804,6 +813,17 @@ const MealPlanDetail: React.FC = () => {
                     </Collapsible>
                   ))
                 )}
+
+                <div className="pt-4 border-t">
+                  <Button
+                    type="button"
+                    onClick={addMeal}
+                    className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Adicionar Refeição
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           )}

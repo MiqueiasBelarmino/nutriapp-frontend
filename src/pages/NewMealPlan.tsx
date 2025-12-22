@@ -41,9 +41,7 @@ const NewMealPlan: React.FC = () => {
   const { patients, fetchPatients } = usePatients()
   const { createMealPlan, generateSuggestion } = useMealPlans()
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("");
   // const [patient, setPatient] = useState(null);
-  const [planTitle, setPlanTitle] = useState("");
   const [meals, setMeals] = useState<Meal[]>([]);
   const [openMeals, setOpenMeals] = useState<Record<string, boolean>>({});
 
@@ -130,7 +128,6 @@ const NewMealPlan: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true);
-    setError("");
 
     if (!formData.patientId) return
 
@@ -310,7 +307,7 @@ const NewMealPlan: React.FC = () => {
           Voltar
         </Button>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">(EM CONSTRUÇÃO) Novo Plano Alimentar</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Novo Plano Alimentar</h1>
           <p className="text-gray-600 mt-2">
             Crie um plano alimentar personalizado para o paciente
           </p>
@@ -418,14 +415,6 @@ const NewMealPlan: React.FC = () => {
               </CardTitle>
               <Button
                 type="button"
-                onClick={addMeal}
-                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Adicionar Refeição
-              </Button>
-              <Button
-                type="button"
                 onClick={handleGenerateSuggestion}
                 disabled={loading || !formData.patientId}
                 className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white"
@@ -491,7 +480,7 @@ const NewMealPlan: React.FC = () => {
                       <CardContent className="space-y-4">
                         {/* Items */}
                         <div className="space-y-3">
-                          {meal.items.map((item: any, itemIndex: any) => (
+                          {meal.items.map((item: any) => (
                             <div key={item.id} className="border border-slate-200 rounded-lg p-4 bg-slate-50">
                               <div className="flex items-start gap-3 mb-3">
                                 <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-2">
@@ -601,15 +590,14 @@ const NewMealPlan: React.FC = () => {
                                 </div>
                               )}
 
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
                                 onClick={() => addSubstitute(meal.id, item.id)}
-                                className="ml-9 h-8 text-xs"
+                                className="h-7 text-[10px] font-bold text-green-600 hover:text-green-700 hover:bg-green-50"
                               >
-                                <Plus className="w-3 h-3 mr-1" />
-                                Adicionar Substituto
+                                <Plus className="h-3 w-3 mr-1" />
+                                ADICIONAR SUBSTITUTO
                               </Button>
                             </div>
                           ))}
@@ -630,6 +618,17 @@ const NewMealPlan: React.FC = () => {
                 </Collapsible>
               ))
             )}
+
+            <div className="pt-4 border-t">
+              <Button
+                type="button"
+                onClick={addMeal}
+                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Adicionar Refeição
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
