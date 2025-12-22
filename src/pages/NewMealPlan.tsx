@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { usePatients } from '@/hooks/usePatients'
 import { useMealPlans } from '@/hooks/useMealPlans'
-import { Apple, ArrowLeft, ChevronDown, ChevronUp, List, Plus, Trash2, Utensils, UtensilsCrossed } from 'lucide-react'
+import { Apple, ArrowLeft, ChevronDown, ChevronUp, List, Plus, Trash2, Utensils, UtensilsCrossed, Sparkles } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { FoodAutocomplete } from '@/components/FoodAutocomplete'
@@ -15,7 +15,9 @@ import { FoodAutocomplete } from '@/components/FoodAutocomplete'
 interface Substitute {
   id: string
   name: string
+  foodId?: string
   quantity: string
+  observation?: string
 }
 
 interface MealItem {
@@ -37,15 +39,11 @@ const NewMealPlan: React.FC = () => {
   const navigate = useNavigate()
   const { patientId } = useParams<{ patientId: string }>()
   const { patients, fetchPatients } = usePatients()
-  const { createMealPlan } = useMealPlans()
+  const { createMealPlan, generateSuggestion } = useMealPlans()
   const [loading, setLoading] = useState(false)
-
-  const [error, setError] = useState("");
-  const [patient, setPatient] = useState(null);
-  const [planTitle, setPlanTitle] = useState("");
+  // const [patient, setPatient] = useState(null);
   const [meals, setMeals] = useState<Meal[]>([]);
   const [openMeals, setOpenMeals] = useState<Record<string, boolean>>({});
-
 
   const [formData, setFormData] = useState({
     patientId: patientId || '',
@@ -59,49 +57,102 @@ const NewMealPlan: React.FC = () => {
     fetchPatients()
   }, [])
 
-  const generateHTMLContent = () => {
-    let html = `<h1>${planTitle}</h1>`;
+  // const generateHTMLContent = () => {
+  //   let html = `<h1>${planTitle}</h1>`;
 
-    meals.forEach(meal => {
-      html += `<h2>${meal.name || 'Refeição sem nome'}</h2>`;
-      html += `<ul>`;
+  //   meals.forEach(meal => {
+  //     html += `<h2>${meal.name || 'Refeição sem nome'}</h2>`;
+  //     html += `<ul>`;
 
-      meal.items.forEach(item => {
-        html += `<li><strong>${item.quantity ? item.quantity + ' ' : ''}${item.name || 'Item sem nome'}</strong>`;
+  //     meal.items.forEach(item => {
+  //       html += `<li><strong>${item.quantity ? item.quantity + ' ' : ''}${item.name || 'Item sem nome'}</strong>`;
 
-        if (item.substitutes && item.substitutes.length > 0) {
-          html += `<ul style="margin-left: 20px; margin-top: 5px;">`;
-          html += `<li style="font-style: italic; color: #64748B;">Substitutos:</li>`;
-          item.substitutes.forEach(sub => {
-            html += `<li style="color: #64748B;">${sub.quantity ? sub.quantity + ' ' : ''}${sub.name || 'Substituto sem nome'}</li>`;
-          });
-          html += `</ul>`;
-        }
+  //       if (item.substitutes && item.substitutes.length > 0) {
+  //         html += `<ul style="margin-left: 20px; margin-top: 5px;">`;
+  //         html += `<li style="font-style: italic; color: #64748B;">Substitutos:</li>`;
+  //         item.substitutes.forEach(sub => {
+  //           html += `<li style="color: #64748B;">${sub.quantity ? sub.quantity + ' ' : ''}${sub.name || 'Substituto sem nome'}</li>`;
+  //         });
+  //         html += `</ul>`;
+  //       }
 
-        html += `</li>`;
+  //       html += `</li>`;
+  //     });
+
+  //     html += `</ul>`;
+  //   });
+
+  //   return html;
+  // };
+
+  const handleGenerateSuggestion = async () => {
+    if (!formData.patientId) {
+      // toast.error('Selecione um paciente primeiro');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const suggestion = await generateSuggestion(formData.patientId);
+      
+      // Ensure IDs are strings and unique
+      const mealsWithIds = suggestion.meals.map((meal: any) => ({
+        ...meal,
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+        items: meal.items.map((item: any) => ({
+          ...item,
+          id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+          substitutes: item.substitutes?.map((sub: any) => ({
+            ...sub,
+            id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+          })) || []
+        }))
+      }));
+
+      setMeals(mealsWithIds);
+      
+      // Auto-open all generated meals
+      const newOpenMeals: Record<string, boolean> = {};
+      mealsWithIds.forEach((meal: any) => {
+        newOpenMeals[meal.id] = true;
       });
+      setOpenMeals(newOpenMeals);
 
-      html += `</ul>`;
-    });
-
-    return html;
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true);
-    setError("");
 
     if (!formData.patientId) return
 
     try {
-      // const htmlContent = generateHTMLContent();
-      // console.log(meals);
+      // Map meals to the format expected by the backend
+      const mappedContent = meals.map(meal => ({
+        name: meal.name,
+        items: meal.items.map(item => ({
+          id: item.foodId, // Backend expects 'id' which will be used as 'foodId'
+          name: item.name, // Send name so backend can create food if id is missing
+          quantity: item.quantity,
+          observation: item.observation,
+          substitutes: item.substitutes?.map(sub => ({
+            id: sub.foodId, // Backend expects 'id' which will be used as 'foodId'
+            name: sub.name, // Send name so backend can create food if id is missing
+            quantity: sub.quantity,
+            observation: sub.observation
+          })) || []
+        }))
+      }));
+
       await createMealPlan({
         patientId: formData.patientId,
         date: new Date(formData.date).toISOString(),
-        content: meals,
-        // calories: Number(formData.calories) || 0,
+        content: mappedContent,
         notes: formData.notes || undefined
       })
 
@@ -132,7 +183,7 @@ const NewMealPlan: React.FC = () => {
   };
 
   const updateMealName = (mealId: string, name: string) => {
-    setMeals(meals.map(meal =>
+    setMeals(prev => prev.map(meal =>
       meal.id === mealId ? { ...meal, name } : meal
     ));
   };
@@ -152,7 +203,7 @@ const NewMealPlan: React.FC = () => {
       observation: "",
       substitutes: []
     };
-    setMeals(meals.map(meal =>
+    setMeals(prev => prev.map(meal =>
       meal.id === mealId
         ? { ...meal, items: [...meal.items, newItem] }
         : meal
@@ -160,7 +211,7 @@ const NewMealPlan: React.FC = () => {
   };
 
   const removeItem = (mealId: string, itemId: string) => {
-    setMeals(meals.map(meal =>
+    setMeals(prev => prev.map(meal =>
       meal.id === mealId
         ? { ...meal, items: meal.items.filter(item => item.id !== itemId) }
         : meal
@@ -168,7 +219,7 @@ const NewMealPlan: React.FC = () => {
   };
 
   const updateItem = (mealId: string, itemId: string, field: string, value: string) => {
-    setMeals(meals.map(meal =>
+    setMeals(prev => prev.map(meal =>
       meal.id === mealId
         ? {
           ...meal,
@@ -184,9 +235,10 @@ const NewMealPlan: React.FC = () => {
     const newSubstitute = {
       id: Date.now().toString(),
       name: "",
-      quantity: ""
+      quantity: "",
+      observation: ""
     };
-    setMeals(meals.map(meal =>
+    setMeals(prev => prev.map(meal =>
       meal.id === mealId
         ? {
           ...meal,
@@ -201,7 +253,7 @@ const NewMealPlan: React.FC = () => {
   };
 
   const removeSubstitute = (mealId: string, itemId: string, substituteId: string) => {
-    setMeals(meals.map(meal =>
+    setMeals(prev => prev.map(meal =>
       meal.id === mealId
         ? {
           ...meal,
@@ -219,7 +271,7 @@ const NewMealPlan: React.FC = () => {
   };
 
   const updateSubstitute = (mealId: string, itemId: string, substituteId: string, field: string, value: string) => {
-    setMeals(meals.map(meal =>
+    setMeals(prev => prev.map(meal =>
       meal.id === mealId
         ? {
           ...meal,
@@ -255,7 +307,7 @@ const NewMealPlan: React.FC = () => {
           Voltar
         </Button>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">(EM CONSTRUÇÃO) Novo Plano Alimentar</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Novo Plano Alimentar</h1>
           <p className="text-gray-600 mt-2">
             Crie um plano alimentar personalizado para o paciente
           </p>
@@ -363,11 +415,12 @@ const NewMealPlan: React.FC = () => {
               </CardTitle>
               <Button
                 type="button"
-                onClick={addMeal}
-                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
+                onClick={handleGenerateSuggestion}
+                disabled={loading || !formData.patientId}
+                className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white"
               >
-                <Plus className="w-4 h-4 mr-2" />
-                Adicionar Refeição
+                <Sparkles className="w-4 h-4 mr-2" />
+                {loading ? 'Gerando...' : 'Gerar com IA'}
               </Button>
             </div>
           </CardHeader>
@@ -427,7 +480,7 @@ const NewMealPlan: React.FC = () => {
                       <CardContent className="space-y-4">
                         {/* Items */}
                         <div className="space-y-3">
-                          {meal.items.map((item: any, itemIndex: any) => (
+                          {meal.items.map((item: any) => (
                             <div key={item.id} className="border border-slate-200 rounded-lg p-4 bg-slate-50">
                               <div className="flex items-start gap-3 mb-3">
                                 <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-2">
@@ -447,8 +500,12 @@ const NewMealPlan: React.FC = () => {
                                         className="h-10"
                                       /> */}
                                       <FoodAutocomplete
-                                        value={item.foodId}
-                                        onChange={(val) => updateItem(meal.id, item.id, "foodId", val)}
+                                        value={item.name}
+                                        selectedId={item.foodId}
+                                        onChange={(name, id) => {
+                                          updateItem(meal.id, item.id, "name", name);
+                                          updateItem(meal.id, item.id, "foodId", id || '');
+                                        }}
                                       />
                                     </div>
                                     <div className="space-y-1">
@@ -493,18 +550,29 @@ const NewMealPlan: React.FC = () => {
                                     Substitutos:
                                   </Label>
                                   {item.substitutes.map((substitute: any) => (
-                                    <div key={substitute.id} className="flex items-center gap-2 bg-white p-2 rounded border border-slate-200">
-                                      <div className="flex-1 grid md:grid-cols-2 gap-2">
-                                        <FoodAutocomplete
-                                          value={substitute.name}
-                                          onChange={(value) =>
-                                            updateSubstitute(meal.id, item.id, substitute.id, "name", value)
-                                          }
-                                        />
+                                    <div key={substitute.id} className="flex items-start gap-2 bg-white p-2 rounded border border-slate-200">
+                                      <div className="flex-1 space-y-2">
+                                        <div className="grid md:grid-cols-2 gap-2">
+                                          <FoodAutocomplete
+                                            value={substitute.name}
+                                            selectedId={substitute.foodId}
+                                            onChange={(name, id) => {
+                                              updateSubstitute(meal.id, item.id, substitute.id, "name", name);
+                                              updateSubstitute(meal.id, item.id, substitute.id, "foodId", id || '');
+                                            }}
+                                          />
+                                          <Input
+                                            value={substitute.quantity}
+                                            onChange={(e) => updateSubstitute(meal.id, item.id, substitute.id, 'quantity', e.target.value)}
+                                            className="h-10 text-sm"
+                                            placeholder="Quantidade"
+                                          />
+                                        </div>
                                         <Input
-                                          value={substitute.quantity}
-                                          onChange={(e) => updateSubstitute(meal.id, item.id, substitute.id, 'quantity', e.target.value)}
-                                          className="h-8 text-sm"
+                                          value={substitute.observation}
+                                          onChange={(e) => updateSubstitute(meal.id, item.id, substitute.id, 'observation', e.target.value)}
+                                          className="h-10 text-sm w-full"
+                                          placeholder="Observação (Opcional)"
                                         />
                                       </div>
 
@@ -513,24 +581,23 @@ const NewMealPlan: React.FC = () => {
                                         variant="ghost"
                                         size="icon"
                                         onClick={() => removeSubstitute(meal.id, item.id, substitute.id)}
-                                        className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                                        className="h-10 w-10 text-red-500 hover:text-red-700 hover:bg-red-50 flex-shrink-0"
                                       >
-                                        <Trash2 className="w-3 h-3" />
+                                        <Trash2 className="w-4 h-4" />
                                       </Button>
                                     </div>
                                   ))}
                                 </div>
                               )}
 
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
                                 onClick={() => addSubstitute(meal.id, item.id)}
-                                className="ml-9 h-8 text-xs"
+                                className="h-7 text-[10px] font-bold text-green-600 hover:text-green-700 hover:bg-green-50"
                               >
-                                <Plus className="w-3 h-3 mr-1" />
-                                Adicionar Substituto
+                                <Plus className="h-3 w-3 mr-1" />
+                                ADICIONAR SUBSTITUTO
                               </Button>
                             </div>
                           ))}
@@ -551,6 +618,17 @@ const NewMealPlan: React.FC = () => {
                 </Collapsible>
               ))
             )}
+
+            <div className="pt-4 border-t">
+              <Button
+                type="button"
+                onClick={addMeal}
+                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Adicionar Refeição
+              </Button>
+            </div>
           </CardContent>
         </Card>
 

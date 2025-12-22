@@ -42,7 +42,7 @@ export const useMealPlans = () => {
     }
   }, [])
 
-  const createMealPlan = async (mealPlanData: Omit<MealPlan, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const createMealPlan = async (mealPlanData: { patientId: string; date: string; content: any[]; notes?: string }) => {
     try {
       const newMealPlan = await api.post('/meal-plans', {
         ...mealPlanData,
@@ -85,6 +85,17 @@ export const useMealPlans = () => {
       toast.error('Erro ao excluir plano alimentar')
       throw error
     }
+    }
+
+  const generateSuggestion = async (patientId: string) => {
+    try {
+      const { data } = await api.post('/meal-plans/suggestion', { patientId })
+      return data
+    } catch (error) {
+      console.error('Erro ao gerar sugestão:', error)
+      toast.error('Erro ao gerar sugestão de plano alimentar')
+      throw error
+    }
   }
 
   return {
@@ -94,6 +105,7 @@ export const useMealPlans = () => {
     fetchMealPlansByPatient,
     createMealPlan,
     updateMealPlan,
-    deleteMealPlan
+    deleteMealPlan,
+    generateSuggestion
   }
 }
