@@ -94,7 +94,7 @@ const EditPatientModal: React.FC<EditPatientModalProps> = ({
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Peso (Kg) *
+                    Peso Inicial (Kg) *
                   </label>
                   <input
                     name="weight"

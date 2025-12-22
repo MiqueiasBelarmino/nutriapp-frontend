@@ -1,26 +1,23 @@
 
 import api from '@/lib/api'
+import { MealPlan } from '@/types/meal-plan.interface'
 import { useState, useCallback } from 'react'
 import toast from 'react-hot-toast'
-
-export interface MealPlan {
-  id: string
-  patientId: string
-  date: string
-  content: string
-  // calories: number
-  notes?: string
-  createdAt: string
-  updatedAt: string
-}
 
 export const useMealPlans = () => {
   const [mealPlans, setMealPlans] = useState<MealPlan[]>([])
   const [loading, setLoading] = useState(false)
 
-  const fetchMealPlans = useCallback(async () => {
+  const fetchMealPlans = useCallback(async (id?: string) => {
     setLoading(true)
     try {
+       if (id) {
+        const { data } = await api.get(`/meal-plans/${id}`);
+        const mealPlan = data as unknown as MealPlan;
+        setMealPlans([mealPlan]);
+        return;
+      }
+
       const { data } = await api.get('/meal-plans');
       setMealPlans(data as unknown as MealPlan[])
     } catch (error) {
@@ -45,7 +42,7 @@ export const useMealPlans = () => {
     }
   }, [])
 
-  const createMealPlan = async (mealPlanData: Omit<MealPlan, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const createMealPlan = async (mealPlanData: { patientId: string; date: string; content: any[]; notes?: string }) => {
     try {
       const newMealPlan = await api.post('/meal-plans', {
         ...mealPlanData,
@@ -88,6 +85,17 @@ export const useMealPlans = () => {
       toast.error('Erro ao excluir plano alimentar')
       throw error
     }
+    }
+
+  const generateSuggestion = async (patientId: string) => {
+    try {
+      const { data } = await api.post('/meal-plans/suggestion', { patientId })
+      return data
+    } catch (error) {
+      console.error('Erro ao gerar sugestão:', error)
+      toast.error('Erro ao gerar sugestão de plano alimentar')
+      throw error
+    }
   }
 
   return {
@@ -97,6 +105,7 @@ export const useMealPlans = () => {
     fetchMealPlansByPatient,
     createMealPlan,
     updateMealPlan,
-    deleteMealPlan
+    deleteMealPlan,
+    generateSuggestion
   }
 }
