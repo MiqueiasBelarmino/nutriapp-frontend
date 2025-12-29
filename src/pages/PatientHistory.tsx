@@ -52,15 +52,40 @@ const PatientHistory: React.FC = () => {
     return new Date(dateString).toLocaleDateString('pt-BR')
   }
 
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2)
+  }
+
+  const sortedConsultations = [...consultations].sort((a, b) => {
+    const dateA = new Date(a.date).getTime()
+    const dateB = new Date(b.date).getTime()
+    
+    // Se as datas forem diferentes, ordena pela data da consulta
+    if (dateA !== dateB) {
+      return dateB - dateA
+    }
+    
+    // Se as datas forem iguais, usa createdAt como desempate
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  })
+
   const getWeightTrend = () => {
     if (consultations.length < 2) return null
 
-    const sortedConsultations = [...consultations].sort((a, b) =>
-      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-    )
+    const timeSortedConsultations = [...consultations].sort((a, b) => {
+      const dateA = new Date(a.date).getTime()
+      const dateB = new Date(b.date).getTime()
+      if (dateA !== dateB) return dateA - dateB
+      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    })
 
-    const firstWeight = sortedConsultations[0]?.weight
-    const lastWeight = sortedConsultations[sortedConsultations.length - 1]?.weight
+    const firstWeight = timeSortedConsultations[0]?.weight
+    const lastWeight = timeSortedConsultations[timeSortedConsultations.length - 1]?.weight
 
     if (!firstWeight || !lastWeight) return null
 
@@ -70,6 +95,8 @@ const PatientHistory: React.FC = () => {
       trend: difference > 0 ? 'up' : difference < 0 ? 'down' : 'stable'
     }
   }
+
+  const weightTrend = getWeightTrend()
 
   if (loading) {
     return (
@@ -98,21 +125,6 @@ const PatientHistory: React.FC = () => {
       </div>
     )
   }
-
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(word => word[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2)
-  }
-
-  const sortedConsultations = [...consultations].sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  )
-
-  const weightTrend = getWeightTrend()
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -278,8 +290,8 @@ const PatientHistory: React.FC = () => {
             <div>
               <p className="text-sm font-medium text-gray-600 mb-1">Peso Atual</p>
               <p className="text-2xl font-bold text-gray-900">
-                {consultations.length > 0
-                  ? `${consultations[consultations.length - 1]?.weight || 'N/A'} kg`
+                {sortedConsultations.length > 0
+                  ? `${sortedConsultations[0]?.weight || 'N/A'} kg`
                   : 'N/A'
                 }
               </p>
